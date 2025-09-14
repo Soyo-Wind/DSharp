@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>D_</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!--単一ファイルの発行を有効にします。 また、dotnet build 時の単一ファイルの警告を有効にします。-->
+    <PublishSingleFile>true</PublishSingleFile>
+    <!--アプリが自己完結型またはフレームワーク依存であるかを判断します。-->
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
+  <Choose>
+      <!-- リリースビルド時のみ -->
+      <When Condition=" '$(Configuration)'=='Release' ">
+          <PropertyGroup>
+              <!-- C# で同じソースコードから常に同じバイナリを生成する -->
+              <!-- https://ufcpp.net/blog/2019/5/deterministicbuilds/ -->
+              <!-- https://gist.github.com/ufcpp/f3cc89e8c266997063eb2c633114668a -->
+              <!-- このオプションの指定で、タイムスタンプとかを決定論的なハッシュ値に置き換える -->
+              <Deterministic>true</Deterministic>
+              <!-- 「相対パス化」って機能は実はなくて、「このプロジェクトのパスを、この指定したパスに置き換える」みたいな処理を書くらしい -->
+              <DeterministicSourceRoot>/_/</DeterministicSourceRoot>
+              <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\'))</RepoRoot>
+              <!-- これが、「あるパスを別のあるパスに置き換える」をやるための設定 -->
+              <PathMap>$(RepoRoot)=$(DeterministicSourceRoot)</PathMap>
+              <!-- ReadyToRun コンパイルを有効にします。 -->
+              <PublishReadyToRun>true</PublishReadyToRun>
+              <!--native AOT-->
+              <PublishAot>true</PublishAot>
+              <!-- 判定だけ有効にするなら -->
+              <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+              
+              <!-- 速度とサイズどちらを優先にするか（Size/Speed） -->
+              <OptimizationPreference>Size</OptimizationPreference>
+              <!-- 同時に有効になるTrimmingの設定（full/partial） -->
+              <TrimMode>partial</TrimMode>
+              <!-- サイズを小さくする追加設定（以下2つは常に有効でもOK） -->
+              <InvariantGlobalization>true</InvariantGlobalization>
+              <StripSymbols>true</StripSymbols>
+              <!-- おまけ。PDB 中にソースコード埋め込み -->
+              <!-- <EnableSourceLink>true</EnableSourceLink>-->
+          </PropertyGroup>
+      </When>
+  </Choose>
+</Project>
